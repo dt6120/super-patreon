@@ -44,8 +44,9 @@ contract Platform {
 
     event NewCreator(address creator, string name, uint fee);
     event NewPost(string title, address creator);
-    event CreatorFollowed(address user, address creator);
-    event CreatorUnfollowed(address user, address creator);
+    event CreatorFollowed(address indexed user, address indexed creator, uint indexed fee);
+    event CreatorUnfollowed(address indexed user, address indexed creator, uint indexed fee);
+    event StreamUpdate(address indexed from, address indexed to, uint indexed amount, uint time);
 
     function addCreator(string memory _name, string memory _photoHash, uint _fee) external {
         require(!isCreator[msg.sender], "You are already a creator");
@@ -74,9 +75,9 @@ contract Platform {
         return creators[id];
     }
 
-    function createPost(string memory _docHash, string memory _title) external onlyCreator {
+    function createPost(string memory _docHash, string memory _title, string memory _tags) external onlyCreator {
         uint id = posts.length;
-        posts.push(Post(id, _title, block.timestamp, msg.sender, "test-post"));
+        posts.push(Post(id, _title, block.timestamp, msg.sender, _tags));
         creatorToPostIds[msg.sender].push(id);
 
         postIdToHash[id] = _docHash;
@@ -134,7 +135,8 @@ contract Platform {
 
         myCreator.followerCount = (myCreator.followerCount).add(1);
 
-        emit CreatorFollowed(msg.sender, _addr);
+        emit CreatorFollowed(msg.sender, _addr, myCreator.fee);
+        emit StreamUpdate(msg.sender, _addr, myCreator.fee, block.timestamp);
     }
 
     function unfollowCreator(address _addr) external {
@@ -145,7 +147,8 @@ contract Platform {
         Creator storage myCreator = creators[addressToCreatorId[_addr]];
         myCreator.followerCount = (myCreator.followerCount).sub(1);
 
-        emit CreatorUnfollowed(msg.sender, _addr);
+        emit CreatorUnfollowed(msg.sender, _addr, myCreator.fee);
+        emit StreamUpdate(msg.sender, _addr, 0, block.timestamp);
     }
 
 }

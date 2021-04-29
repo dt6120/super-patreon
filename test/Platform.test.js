@@ -66,7 +66,7 @@ contract('Platform', ([creator, user1, user2]) => {
             let result;
 
             it('creates a new post', async () => {
-                result = await platform.createPost('0x12345', 'New post', { from: creator });
+                result = await platform.createPost('0x12345', 'New post', 'tag-1,tag-2,tag-3', { from: creator });
 
                 const event = result.logs[0].args;
 
@@ -92,7 +92,7 @@ contract('Platform', ([creator, user1, user2]) => {
         describe('and user is not a creator', () => {
             it('throws an error', async () => {
                 try {
-                    await platform.createPost('0x12345', 'New post', { from: user1 });
+                    await platform.createPost('0x12345', 'New post', 'tag-1,tag-2,tag-3', { from: user1 });
                     expect(1).to.equal(2);
                 } catch (error) {
                     expect(error.reason).to.equal('You are not a creator');
